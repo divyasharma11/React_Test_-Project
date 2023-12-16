@@ -54,10 +54,24 @@ padding: 10px;
 }
 .btn_grp{
     display: flex;
+    margin-top: 1.5rem;
+}
+.btn{
+    width: 60px;
+    padding: 6px;
+    margin: 5px;
+    background-color: white;
+    color: rgb(78, 177, 216);
+    border: 1px solid skyblue;
+    border-radius: 5px;
+    outline: none;
 }
 .input{
    width: 100px;
-   height: 50px;
+   height: 40px;
     /* border: none;
     outline: none; */
+}
+.backbtn{
+    margin: 2rem 2rem;
 }

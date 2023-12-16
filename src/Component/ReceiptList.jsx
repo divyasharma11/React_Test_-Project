@@ -1,44 +1,31 @@
 import React from "react";
 import Button from '@mui/material/Button';
 import { useNavigate } from "react-router-dom";
-import { saveAs } from "file-saver";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-
-// import { jsPDF } from "jspdf";
-import * as XLSX from "xlsx";
-import { Document, Page, Text, View, StyleSheet, PDFViewer } from "@react-pdf/renderer";
 import "./ReceiptList.css";
 
 const ReceiptList = () => {
   const navigate = useNavigate();
-
-  // Load records from local storage or API
   const records = JSON.parse(localStorage.getItem("receiptRecords")) || [];
 
-  // Handle Add button click
   const handleAddClick = () => {
-    // Navigate to the ReceiptCRUD or open a modal for adding a new receipt
     navigate("/receipt-crud");
   };
 
-  // Handle Refresh button click
   const handleRefreshClick = () => {
-    // Reload records from local storage or API
-    const updatedRecords = JSON.parse(localStorage.getItem("receiptRecords")) || [];
-    // setRecords(updatedRecords);
+    window.location.reload();
+   
   };
 
-  // Handle Print button click
   const handlePrintClick = () => {
-    // Add logic to export records to PDF or Excel
     exportToPDF(records);
   };
 
-  // Handle Exit button click
   const handleExitClick = () => {
-    // Navigate to the home page or perform other exit actions
+    navigate("/");
   };
+
  // Export records to PDF
  const exportToPDF = (records) => {
   const doc = new jsPDF();
@@ -56,7 +43,16 @@ const ReceiptList = () => {
   doc.autoTable(tableColumn, tableRows, { startY: 20 });
   doc.save("receipts.pdf");
 };
- 
+const handleDeleteItem = (index) => {
+  const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+  if (confirmDelete) {
+    const updatedRecords = [...records];
+    updatedRecords.splice(index, 1);
+    localStorage.setItem("receiptRecords", JSON.stringify(updatedRecords));
+    
+    window.location.reload();
+  }
+};
   return (
     <div className="table_container">
       <div>
@@ -95,9 +91,9 @@ const ReceiptList = () => {
                   <td>{record.qty}</td>
                   <td>{record.amount}</td>
                   <td>{record.description}</td>
-                  <td className='btn_grp'>
-                    <button className='btn'>Edit</button>
-                    <button className='btn'>Delete</button>
+                  <td >
+                    {/* <button className='btn'>Edit</button> */}
+                    <button className='btn' onClick={() => handleDeleteItem(index)}>Delete</button>
                   </td>
                 </tr>
               ))}

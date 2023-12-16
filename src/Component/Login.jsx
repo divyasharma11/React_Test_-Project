@@ -24,19 +24,19 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       // Use fixed values for name and password
-      const fixedName = 'admin';
-      const fixedPassword = 'admin@123';
+      // const fixedName = 'admin';
+      // const fixedPassword = 'admin@123';
 
       const response = await fetch(
-        `https://reacttestprojectapi.azurewebsites.net/api/UserManagement/AuthenticateUser?UserName=${fixedName}&Password=${fixedPassword}`,
+        `https://reacttestprojectapi.azurewebsites.net/api/UserManagement/AuthenticateUser?UserName=${name}&Password=${password}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            UserName: fixedName,
-            Password: fixedPassword,
+            UserName: name,
+            Password: password,
           }),
         }
       );
@@ -49,15 +49,12 @@ const Login = () => {
         return;
       }
 
-      const authToken = data.token; // Assuming the API returns a 'token' property in the response
+      const authToken = data.token; 
 
-      // Save the authToken to local storage
       localStorage.setItem('authToken', authToken);
 
-      // Navigate to Receipt List page after successful login
       navigate('/receipt-list');
 
-      // Perform any additional actions after successful login.
       console.log('Login successful');
     } catch (error) {
       setError('An error occurred during login');

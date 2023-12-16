@@ -17,6 +17,7 @@ th {
     border-right: 1px solid black;
 }
 td {
+    width: 150px;
     text-align: center;
     border-right: 1px solid black;
 }
@@ -28,4 +29,14 @@ td {
 .top h3{
     color: skyblue;
     padding-left: 40px;
+}
+.btnDlete_list{
+    width: 60px;
+    padding: 6px;
+    margin-top: 15px 5px;
+    background-color: white;
+    color: rgb(78, 177, 216);
+    border: 1px solid skyblue;
+    border-radius: 5px;
+    outline: none;
 }

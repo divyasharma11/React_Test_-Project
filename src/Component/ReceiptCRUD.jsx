@@ -1,27 +1,46 @@
-import React, { useState } from 'react';
-import { Button, TextField } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Button } from '@mui/material';
 import "./ReceiptCRUD.css";
 import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 const ReceiptCRUD = () => {
-  const [records, setRecords] = useState([]);
+  const [records, setRecords] = useState( []);
   const [receiptNumber, setReceiptNumber] = useState(Math.floor(Math.random() * 100));
-  const[name,setName]=useState("");
-  const[remark,setRemark]=useState("");
-  const navigate=useNavigate();
+  const [name, setName] = useState("");
+  const [remark, setRemark] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
+  const navigate = useNavigate();
 
   const generateReceiptNumber = () => {
-    // setReceiptNumber( Math.floor(Math.random() * 100));
-    setReceiptNumber(prev=>prev+1);
+    setReceiptNumber(prev => prev + 1);
     return receiptNumber;
   };
-  
-  
-  // Add a new blank row to the records
-  const addRow = () => {
-    setRecords([...records, { receiptNo:generateReceiptNumber(), description: '', unit: '',name:name,remark:remark, rate: 0, qty: 0, discount: 0, amount: 0 ,date:new Date().toLocaleDateString()}]);
-  };
+  useEffect(() => {
+    setRecords([
+      {
+        receiptNo: generateReceiptNumber(),
+        description: '',
+        unit: '',
+        name: name,
+        remark: '',
+        rate: 0,
+        qty: 0,
+        discount: 0,
+        amount: 0,
+        date: new Date().toLocaleDateString(),
+      },
+    ]);
+  }, [name]); 
 
-  // Handle changes in the grid
+  const addRow = () => {
+    const newRecord = { receiptNo: generateReceiptNumber(), description: '', unit: '', name: name, remark: remark, rate: 0, qty: 0, discount: 0, amount: 0, date: new Date().toLocaleDateString() };
+    setRecords([...records, newRecord]);
+    // Set the editIndex to the index of the newly added row
+    setEditIndex(records.length);
+  };
+  
   const handleGridChange = (index, field, value) => {
     const updatedRecords = [...records];
     updatedRecords[index][field] = value;
@@ -36,7 +55,6 @@ const ReceiptCRUD = () => {
     setRecords(updatedRecords);
   };
 
-  // Calculate Total Qty, Total Amount, Discount, and Net Amount
   const calculateTotals = () => {
     const totalQty = records.reduce((total, record) => total + (record.qty || 0), 0);
     const totalAmount = records.reduce((total, record) => total + (record.amount || 0), 0);
@@ -46,37 +64,83 @@ const ReceiptCRUD = () => {
     return { totalQty, totalAmount, discount, netAmount };
   };
 
-  // Save the records to local storage or perform other actions
   const saveRecords = () => {
-    // Add logic to save records to local storage
     localStorage.setItem("receiptRecords", JSON.stringify(records));
     navigate("/receipt-list");
   };
 
   const { totalQty, totalAmount, discount, netAmount } = calculateTotals();
 
+  const handleEditItem = (index) => {
+    setEditIndex(index);
+  };
+
+  const handleUpdateItem = () => {
+    setEditIndex(null);
+  };
+
+  const handleDeleteItem = (index) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    if (confirmDelete) {
+      const updatedRecords = [...records];
+      updatedRecords.splice(index, 1);
+      setRecords(updatedRecords);
+    }
+  };
+ const handleCancle=()=>{
+  navigate("/receipt-list");
+ }
+ const handleDeleteCrudList=()=>{
+  navigate("/receipt-list");
+ }
+const handlePrintClick=()=>{
+  exportToPDF(records);
+}
+// Export records to PDF
+const exportToPDF = (records) => {
+  const doc = new jsPDF();
+  const tableColumn = ["Sr No.", "Receipt No", "Receipt Date", "Person Name", "Total Qty", "Net Amount", "Item"];
+  const tableRows = records.map((record, index) => [
+    index + 1,
+    record.receiptNo,
+    record.date,
+    record.name,
+    record.qty,
+    record.amount,
+    record.description,
+  ]);
+
+  doc.autoTable(tableColumn, tableRows, { startY: 20 });
+  doc.save("receipts.pdf");
+};
+
+const handleBackBtn=()=>{
+      navigate("/receipt-list");
+}
   return (
+    <>
+      <button className='backbtn' onClick={handleBackBtn}>Back</button>
     <div className="crud_container">
-      <div>
+       <div>
       <div className="top">
         <div>
           <h3>ReceiptCRUD </h3>
         </div>
         <div>
-        <Button variant="outlined" onClick={saveRecords}>Save</Button>
-        <Button variant="outlined">Cancel</Button>
-        <Button variant="outlined">Delete</Button>
-        <Button variant="outlined">Print</Button>   
+          <Button variant="outlined" onClick={saveRecords}>Save</Button>
+          <Button variant="outlined" onClick={handleCancle}>Cancel</Button>
+          <Button variant="outlined" onClick={handleDeleteCrudList}>Delete</Button>
+          <Button variant="outlined" onClick={handlePrintClick}>Print</Button>
         </div>
       </div>
       <div className='crud_container1'>
         <div className='crud_top'>
           <div className='personal_details'>
             <div className='no'>Receipt No: {receiptNumber}</div>
-            <div className='date'>Receipt Date: {new Date().toLocaleDateString()}</div>
+            <div className='date'>Receipt Date: { new Date().toLocaleDateString()}</div>
           </div>
           <div className='personal_details'>
-            <input type='text' className='name' placeholder='Person Name' value={name} onChange={(e)=>setName(e.target.value)}/>
+            <input type='text' className='name' placeholder='Person Name' value={name} onChange={(e) => setName(e.target.value)} />
             <Button variant="outlined" onClick={addRow}>Add Row</Button>
           </div>
         </div>
@@ -99,47 +163,74 @@ const ReceiptCRUD = () => {
                 <tr key={index}>
                   <td>{index + 1}</td>
                   <td>
-                    <input
-                      className='input'
-                      value={record.description}
-                      onChange={(e) => handleGridChange(index, 'description', e.target.value)}
-                    />
+                    {editIndex === index ? (
+                      <input
+                        className='input'
+                        value={record.description}
+                        onChange={(e) => handleGridChange(index, 'description', e.target.value)}
+                      />
+                    ) : (
+                      <span>{record.description}</span>
+                    )}
                   </td>
                   <td>
-                    <input
-                      className='input'
-                      value={record.unit}
-                      onChange={(e) => handleGridChange(index, 'unit', e.target.value)}
-                    />
+                    {editIndex === index ? (
+                      <input
+                        className='input'
+                        value={record.unit}
+                        onChange={(e) => handleGridChange(index, 'unit', e.target.value)}
+                      />
+                    ) : (
+                      <span>{record.unit}</span>
+                    )}
                   </td>
                   <td>
-                    <input
-                      className='input'
-                      type="number"
-                      value={record.rate}
-                      onChange={(e) => handleGridChange(index, 'rate', parseFloat(e.target.value))}
-                    />
+                    {editIndex === index ? (
+                      <input
+                        className='input'
+                        type="number"
+                        value={record.rate}
+                        onChange={(e) => handleGridChange(index, 'rate', parseFloat(e.target.value))}
+                      />
+                    ) : (
+                      <span>{record.rate}</span>
+                    )}
                   </td>
                   <td>
-                    <input
-                      className='input'
-                      type="number"
-                      value={record.qty}
-                      onChange={(e) => handleGridChange(index, 'qty', parseFloat(e.target.value))}
-                    />
+                    {editIndex === index ? (
+                      <input
+                        className='input'
+                        type="number"
+                        value={record.qty}
+                        onChange={(e) => handleGridChange(index, 'qty', parseFloat(e.target.value))}
+                      />
+                    ) : (
+                      <span>{record.qty}</span>
+                    )}
                   </td>
                   <td>
-                    <input
-                      className='input'
-                      type="number"
-                      value={record.discount}
-                      onChange={(e) => handleGridChange(index, 'discount', parseFloat(e.target.value))}
-                    />
+                    {editIndex === index ? (
+                      <input
+                        className='input'
+                        type="number"
+                        value={record.discount}
+                        onChange={(e) => handleGridChange(index, 'discount', parseFloat(e.target.value))}
+                      />
+                    ) : (
+                      <span>{record.discount}</span>
+                    )}
                   </td>
                   <td>{record.amount}</td>
                   <td className='btn_grp'>
-                    <button className='btn'>Edit</button>
-                    <button className='btn'>Delete</button>
+                    {editIndex === index ? (
+                      //  <Button variant="outlined" onClick={() => handleUpdateItem(index)}>Update</Button>
+                      <button className='btn' onClick={() => handleUpdateItem(index)}>Update</button>
+                    ) : (
+                      <button className='btn' onClick={() => handleEditItem(index)}>Edit</button>
+                      // <Button variant="outlined" onClick={() =>handleEditItem(index)}>Edit</Button>
+                    )}
+                    <button className='btn' onClick={() => handleDeleteItem(index)}>Delete</button>
+                    {/* <Button variant="outlined" onClick={() => handleDeleteItem(index)}>Delete</Button> */}
                   </td>
                 </tr>
               ))}
@@ -147,7 +238,7 @@ const ReceiptCRUD = () => {
           </table>
         </div>
         <div className='bottom'>
-          <textarea type='text' className='remark' placeholder='Remark'  value={remark} onChange={(e)=>setRemark(e.target.value)}/>
+          <textarea type='text' className='remark' placeholder='Remark' value={remark} onChange={(e) => setRemark(e.target.value)} />
           <div>
             <Button variant="outlined">Total Qty: {totalQty}</Button>
           </div>
@@ -158,9 +249,11 @@ const ReceiptCRUD = () => {
           </div>
         </div>
       </div>
+      </div>
     </div>
-    </div>
+    </>
   );
 };
 
 export default ReceiptCRUD;
+
