@@ -30,13 +30,59 @@ td {
     color: skyblue;
     padding-left: 40px;
 }
-.btnDlete_list{
-    width: 60px;
-    padding: 6px;
-    margin-top: 15px 5px;
-    background-color: white;
-    color: rgb(78, 177, 216);
-    border: 1px solid skyblue;
-    border-radius: 5px;
-    outline: none;
+
+@media (max-width: 768px) {
+    table {
+        width: 100%;
+    }
+
+    th,
+    td {
+        width: auto;
+    }
+
+    .top {
+        flex-direction: column;
+        justify-content: space-around;
+        text-align: center;
+    }
+
+    .top h3 {
+        padding-left: 0;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        width: fit-content;
+        margin-top: 10px;
+    }
+}
+@media (max-width: 576px) {
+    table {
+        width: 100%;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+
+    th,
+    td {
+        width: auto;
+    }
+
+    .top {
+        flex-direction: column;
+       padding: 20px;
+        text-align: center;
+    }
+
+    .top h3 {
+        padding-left: 0;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        /* display: none; */
+        margin-top: 10px;
+    }
+   
 }

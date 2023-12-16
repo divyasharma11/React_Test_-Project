@@ -14,9 +14,23 @@
     border: 1px solid black;
 }
 .crud_top{
-    width: 100%;
-   /* margin-bottom: 20px; */
-    
+    width: 100%;  
+}
+table {
+    border: 1px solid black;
+    margin-top:10px ;
+    /* width: 800px;
+    height: 200px; */
+}
+ 
+th {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+td {
+    width: 150px;
+    text-align: center;
+    border-right: 1px solid black;
 }
 .personal_details{
     display: flex;
@@ -74,4 +88,38 @@ padding: 10px;
 }
 .backbtn{
     margin: 2rem 2rem;
+}
+@media (max-width: 576px) {
+    .crud_container{
+        padding: 20px;
+    }
+    .crud_container1{
+        width: 100%;
+    height: fit-content;
+    margin: 50px;
+    padding: 30px;
+    border: 1px solid black;
+    }
+    .personal_details,
+    .crud_btn,
+    .input,
+    .date {
+        width: 60%;
+        margin-left: 20px;
+    }
+    .bottom{
+     width: 90%;
+    }
+    .remark{
+        width: 50%;
+    }
+    .crud_top {
+        flex-direction: column;
+    }
+
+    table {
+        /* Adjust table styles for small screens */
+        width: 100%;
+        /* Additional styles as needed */
+    }
 }
